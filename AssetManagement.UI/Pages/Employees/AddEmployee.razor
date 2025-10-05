@@ -1,0 +1,109 @@
+@page "/employees/add"
+@inject IEmployeeService EmployeeService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Add Employee</PageTitle>
+
+<div class="mb-4">
+    <h1>Add New Employee</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/employees">Employees</a></li>
+            <li class="breadcrumb-item active">Add</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@employee" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fullName" class="form-label">Full Name *</label>
+                    <InputText id="fullName" class="form-control" @bind-Value="employee.FullName" />
+                    <ValidationMessage For="@(() => employee.FullName)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    <InputText id="email" type="email" class="form-control" @bind-Value="employee.Email" />
+                    <ValidationMessage For="@(() => employee.Email)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone Number *</label>
+                    <InputText id="phone" class="form-control" @bind-Value="employee.PhoneNumber" />
+                    <ValidationMessage For="@(() => employee.PhoneNumber)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="department" class="form-label">Department *</label>
+                    <InputText id="department" class="form-control" @bind-Value="employee.Department" />
+                    <ValidationMessage For="@(() => employee.Department)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="designation" class="form-label">Designation *</label>
+                    <InputText id="designation" class="form-control" @bind-Value="employee.Designation" />
+                    <ValidationMessage For="@(() => employee.Designation)" />
+                </div>
+
+                <div class="col-md-6 mb-3 d-flex align-items-center">
+                    <InputCheckbox id="status" class="form-check-input me-2" @bind-Value="employee.IsActive" />
+                    <label for="status" class="form-check-label">Active</label>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary me-2" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Save Employee
+                </button>
+
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                    Cancel
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private EmployeeDTO employee = new();
+    private bool isSaving = false;
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        try
+        {
+            await EmployeeService.CreateEmployeeAsync(employee);
+            await JSRuntime.InvokeVoidAsync("alert", "Employee created successfully!");
+            NavigationManager.NavigateTo("/employees");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/employees");
+    }
+}

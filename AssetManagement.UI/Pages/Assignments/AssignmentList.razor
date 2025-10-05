@@ -1,0 +1,167 @@
+@page "/assignments"
+@inject IAssignmentService AssignmentService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Assignments</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Asset Assignments</h1>
+    <button class="btn btn-primary" @onclick="NavigateToCreate">
+        <span class="oi oi-plus"></span> Create Assignment
+    </button>
+</div>
+
+@if (assignments == null)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border" role="status"></div>
+    </div>
+}
+else if (!assignments.Any())
+{
+    <div class="alert alert-info">
+        <i class="oi oi-info"></i>
+        No assignments found. Click "Create Assignment" to assign assets to employees.
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link @(showActive ? "active" : "")" @onclick="ShowActive">
+                        Active Assignments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(!showActive ? "active" : "")" @onclick="ShowAll">
+                        All Assignments
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Asset</th>
+                            <th>Employee</th>
+                            <th>Assigned Date</th>
+                            <th>Returned Date</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assignment in filteredAssignments)
+                        {
+                            <tr>
+                                <td>@assignment.AssignmentId</td>
+                                <td>@assignment.AssetName</td>
+                                <td>@assignment.EmployeeName</td>
+                                <td>@assignment.AssignedDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    @if (assignment.ReturnedDate.HasValue)
+                                    {
+                                        @assignment.ReturnedDate.Value.ToString("yyyy-MM-dd")
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (assignment.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Returned</span>
+                                    }
+                                </td>
+                                <td>@(assignment.Notes ?? "-")</td>
+                                <td>
+                                    @if (assignment.IsActive)
+                                    {
+                                        <button class="btn btn-sm btn-warning" @onclick="() => ReturnAsset(assignment.AssignmentId)">
+                                            Return
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3">
+                <p class="text-muted">Total: @filteredAssignments.Count assignment(s)</p>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AssignmentDTO> assignments;
+    private List<AssignmentDTO> filteredAssignments = new();
+    private bool showActive = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAssignments();
+    }
+
+    private async Task LoadAssignments()
+    {
+        var result = await AssignmentService.GetAllAssignmentsAsync();
+        assignments = result.ToList();
+        FilterByStatus();
+    }
+
+    private void ShowActive()
+    {
+        showActive = true;
+        FilterByStatus();
+    }
+
+    private void ShowAll()
+    {
+        showActive = false;
+        FilterByStatus();
+    }
+
+    private void FilterByStatus()
+    {
+        filteredAssignments = showActive ? assignments.Where(a => a.IsActive).ToList() : assignments;
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/assignments/create");
+    }
+
+    private async Task ReturnAsset(int assignmentId)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to mark this asset as returned?");
+        if (confirmed)
+        {
+            try
+            {
+                await AssignmentService.ReturnAssetAsync(assignmentId, DateTime.Now, "Asset returned");
+                await JSRuntime.InvokeVoidAsync("alert", "Asset returned successfully!");
+                await LoadAssignments();
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+            }
+        }
+    }
+}

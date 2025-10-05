@@ -1,0 +1,85 @@
+is_global = true
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = AssetManagement.UI
+build_property.RootNamespace = AssetManagement.UI
+build_property.ProjectDir = C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.UI\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.UI
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Assets/AddAsset.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzZXRzXEFkZEFzc2V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Assets/AssetList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzZXRzXEFzc2V0TGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Assets/EditAsset.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzZXRzXEVkaXRBc3NldC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Assignments/AssignmentList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzaWdubWVudHNcQXNzaWdubWVudExpc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Assignments/CreateAssignment.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXNzaWdubWVudHNcQ3JlYXRlQXNzaWdubWVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Employees/AddEmployee.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1wbG95ZWVzXEFkZEVtcGxveWVlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Employees/EditEmployee.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1wbG95ZWVzXEVkaXRFbXBsb3llZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Employees/EmployeeList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRW1wbG95ZWVzXEVtcGxveWVlTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/Reports/Reports.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVwb3J0c1xSZXBvcnRzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Shared/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Shared/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Anushka Raj/OneDrive/Desktop/ScrifronAssignment2/AssetManagement.UI/Pages/_Host.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcX0hvc3QuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 

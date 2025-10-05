@@ -1,0 +1,139 @@
+@page "/assets/add"
+@inject IAssetService AssetService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Add Asset</PageTitle>
+
+<div class="mb-4">
+    <h1>Add New Asset</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/assets">Assets</a></li>
+            <li class="breadcrumb-item active">Add</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@asset" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="assetName" class="form-label">Asset Name *</label>
+                    <InputText id="assetName" class="form-control" @bind-Value="asset.AssetName" />
+                    <ValidationMessage For="@(() => asset.AssetName)" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="assetType" class="form-label">Asset Type *</label>
+                    <InputText id="assetType" class="form-control" @bind-Value="asset.AssetType"
+                               placeholder="e.g., Laptop, Monitor, Phone" />
+                    <ValidationMessage For="@(() => asset.AssetType)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="makeModel" class="form-label">Make/Model</label>
+                    <InputText id="makeModel" class="form-control" @bind-Value="asset.MakeModel" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="serialNumber" class="form-label">Serial Number</label>
+                    <InputText id="serialNumber" class="form-control" @bind-Value="asset.SerialNumber" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="purchaseDate" class="form-label">Purchase Date</label>
+                    <InputDate id="purchaseDate" class="form-control" @bind-Value="asset.PurchaseDate" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="warrantyDate" class="form-label">Warranty Expiry Date</label>
+                    <InputDate id="warrantyDate" class="form-control" @bind-Value="asset.WarrantyExpiryDate" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="condition" class="form-label">Condition *</label>
+                    <InputSelect id="condition" class="form-select" @bind-Value="asset.Condition">
+                        <option value="@AssetCondition.New">New</option>
+                        <option value="@AssetCondition.Good">Good</option>
+                        <option value="@AssetCondition.NeedsRepair">Needs Repair</option>
+                        <option value="@AssetCondition.Damaged">Damaged</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="status" class="form-label">Status *</label>
+                    <InputSelect id="status" class="form-select" @bind-Value="asset.Status">
+                        <option value="@AssetStatus.Available">Available</option>
+                        <option value="@AssetStatus.Assigned">Assigned</option>
+                        <option value="@AssetStatus.UnderRepair">Under Repair</option>
+                        <option value="@AssetStatus.Retired">Retired</option>
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="isSpare" class="form-label">Is Spare Asset?</label>
+                    <div class="form-check mt-2">
+                        <InputCheckbox id="isSpare" class="form-check-input" @bind-Value="asset.IsSpare" />
+                        <label class="form-check-label" for="isSpare">Yes</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="specifications" class="form-label">Specifications / Details</label>
+                <InputTextArea id="specifications" class="form-control" rows="4" @bind-Value="asset.Specifications" />
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary me-2" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    Save Asset
+                </button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private AssetDTO asset = new AssetDTO();
+    private bool isSaving = false;
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        try
+        {
+            await AssetService.CreateAssetAsync(asset);
+            await JSRuntime.InvokeVoidAsync("alert", "Asset created successfully!");
+            NavigationManager.NavigateTo("/assets");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/assets");
+    }
+}

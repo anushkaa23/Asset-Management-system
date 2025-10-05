@@ -1,0 +1,15 @@
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\bin\Debug\net9.0\AssetManagement.Business.deps.json
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\bin\Debug\net9.0\AssetManagement.Business.dll
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\bin\Debug\net9.0\AssetManagement.Business.pdb
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\bin\Debug\net9.0\AssetManagement.Data.dll
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\bin\Debug\net9.0\AssetManagement.Data.pdb
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.csproj.AssemblyReference.cache
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.AssemblyInfoInputs.cache
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.AssemblyInfo.cs
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.csproj.CoreCompileInputs.cache
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetMan.9DE99A42.Up2Date
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.dll
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\refint\AssetManagement.Business.dll
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\AssetManagement.Business.pdb
+C:\Users\Anushka Raj\OneDrive\Desktop\ScrifronAssignment2\AssetManagement.Business\obj\Debug\net9.0\ref\AssetManagement.Business.dll

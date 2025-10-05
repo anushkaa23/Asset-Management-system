@@ -1,0 +1,140 @@
+@page "/assignments/create"
+@inject IAssignmentService AssignmentService
+@inject IAssetService AssetService
+@inject IEmployeeService EmployeeService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Assignment</PageTitle>
+
+<div class="mb-4">
+    <h1>Create New Assignment</h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/assignments">Assignments</a></li>
+            <li class="breadcrumb-item active">Create</li>
+        </ol>
+    </nav>
+</div>
+
+@if (availableAssets == null || activeEmployees == null)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border" role="status"></div>
+    </div>
+}
+else if (!availableAssets.Any() || !activeEmployees.Any())
+{
+    <div class="alert alert-warning">
+        <i class="oi oi-warning"></i>
+        @if (!availableAssets.Any())
+        {
+            <p>No available assets found. Please add assets with "Available" status first.</p>
+        }
+        @if (!activeEmployees.Any())
+        {
+            <p>No active employees found. Please add active employees first.</p>
+        }
+        <a href="/employees" class="btn btn-sm btn-primary me-2">Manage Employees</a>
+        <a href="/assets" class="btn btn-sm btn-primary">Manage Assets</a>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@assignment" OnValidSubmit="@HandleSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="assetId" class="form-label">Select Asset *</label>
+                        <InputSelect id="assetId" class="form-select" @bind-Value="assignment.AssetId">
+                            <option value="0">-- Select Asset --</option>
+                            @foreach (var asset in availableAssets)
+                            {
+                                <option value="@asset.AssetId">@asset.AssetName (@asset.AssetType) - @asset.SerialNumber</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => assignment.AssetId)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="employeeId" class="form-label">Select Employee *</label>
+                        <InputSelect id="employeeId" class="form-select" @bind-Value="assignment.EmployeeId">
+                            <option value="0">-- Select Employee --</option>
+                            @foreach (var employee in activeEmployees)
+                            {
+                                <option value="@employee.EmployeeId">@employee.FullName (@employee.Department)</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => assignment.EmployeeId)" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="assignedDate" class="form-label">Assignment Date *</label>
+                        <InputDate id="assignedDate" class="form-control" @bind-Value="assignment.AssignedDate" />
+                        <ValidationMessage For="@(() => assignment.AssignedDate)" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="notes" class="form-label">Notes</label>
+                    <InputTextArea id="notes" class="form-control" rows="3" @bind-Value="assignment.Notes"
+                                   placeholder="Any additional notes about this assignment..." />
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Create Assignment
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private AssignmentDTO assignment = new AssignmentDTO();
+    private List<AssetDTO> availableAssets;
+    private List<EmployeeDTO> activeEmployees;
+    private bool isSaving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableAssets = (await AssetService.GetAvailableAssetsAsync()).ToList();
+        activeEmployees = (await EmployeeService.GetActiveEmployeesAsync()).ToList();
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        try
+        {
+            await AssignmentService.CreateAssignmentAsync(assignment);
+            await JSRuntime.InvokeVoidAsync("alert", "Assignment created successfully!");
+            NavigationManager.NavigateTo("/assignments");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/assignments");
+    }
+}
