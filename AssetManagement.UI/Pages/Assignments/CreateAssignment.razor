@@ -110,8 +110,23 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        availableAssets = (await AssetService.GetAvailableAssetsAsync()).ToList();
+        // Load all assets and active assignments
+        var allAssets = (await AssetService.GetAllAssetsAsync()).ToList();
+        var activeAssignments = (await AssignmentService.GetActiveAssignmentsAsync()).ToList();
+
+        // Only show assets that are available and not already assigned
+        availableAssets = allAssets
+            .Where(a => a.Status == AssetStatus.Available && !activeAssignments.Any(asg => asg.AssetId == a.AssetId))
+            .ToList();
+
         activeEmployees = (await EmployeeService.GetActiveEmployeesAsync()).ToList();
+
+        // Ensure default values
+        if (assignment.AssignedDate == default)
+            assignment.AssignedDate = DateTime.UtcNow;
+
+        if (string.IsNullOrWhiteSpace(assignment.Notes))
+            assignment.Notes = "";
     }
 
     private async Task HandleSubmit()
@@ -119,13 +134,25 @@ else
         isSaving = true;
         try
         {
+            // Validate AssetId and EmployeeId before saving
+            if (assignment.AssetId == 0 || assignment.EmployeeId == 0)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Please select both Asset and Employee.");
+                return;
+            }
+
+            // Ensure Notes is not null
+            assignment.Notes = string.IsNullOrWhiteSpace(assignment.Notes) ? "" : assignment.Notes;
+
             await AssignmentService.CreateAssignmentAsync(assignment);
+
             await JSRuntime.InvokeVoidAsync("alert", "Assignment created successfully!");
             NavigationManager.NavigateTo("/assignments");
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+            var msg = ex.InnerException?.Message ?? ex.Message;
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {msg}");
         }
         finally
         {

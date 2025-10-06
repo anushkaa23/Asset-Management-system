@@ -27,23 +27,23 @@
 @code {
     private string username = "User";
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        try
+        if (firstRender)
         {
-            var result = await SessionStorage.GetAsync<string>("username");
-            
-            if (!result.Success || string.IsNullOrEmpty(result.Value))
+            try
             {
-                NavigationManager.NavigateTo("/login", forceLoad: true);
-                return;
+                var result = await SessionStorage.GetAsync<string>("username");
+                if (result.Success && !string.IsNullOrEmpty(result.Value))
+                {
+                    username = result.Value;
+                    StateHasChanged();
+                }
             }
-
-            username = result.Value;
-        }
-        catch
-        {
-            NavigationManager.NavigateTo("/login", forceLoad: true);
+            catch
+            {
+                // Silently fail - login page doesn't need username
+            }
         }
     }
 
@@ -53,11 +53,11 @@
         {
             await SessionStorage.DeleteAsync("username");
             await SessionStorage.DeleteAsync("userId");
-            NavigationManager.NavigateTo("/login", forceLoad: true);
+            NavigationManager.NavigateTo("/login", true);
         }
         catch (Exception ex)
         {
-            await JSRuntime.InvokeVoidAsync("alert", $"Error logging out: {ex.Message}");
+            Console.WriteLine($"Logout error: {ex.Message}");
         }
     }
 }

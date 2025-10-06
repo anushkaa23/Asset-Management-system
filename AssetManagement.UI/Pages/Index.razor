@@ -1,6 +1,7 @@
-
 @page "/"
 @inject IDashboardService DashboardService
+@inject ProtectedSessionStorage SessionStorage
+@inject NavigationManager NavigationManager
 
 <PageTitle>Dashboard - Asset Management</PageTitle>
 
@@ -53,8 +54,26 @@
 @code {
     private DashboardDTO? dashboardData;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        dashboardData = await DashboardService.GetDashboardDataAsync();
+        if (firstRender)
+        {
+            try
+            {
+                var result = await SessionStorage.GetAsync<string>("username");
+                if (!result.Success || string.IsNullOrEmpty(result.Value))
+                {
+                    NavigationManager.NavigateTo("/login");
+                    return;
+                }
+
+                dashboardData = await DashboardService.GetDashboardDataAsync();
+                StateHasChanged();
+            }
+            catch
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+        }
     }
 }

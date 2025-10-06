@@ -82,7 +82,7 @@ namespace AssetManagement.Business.Services
                 Condition = asset.Condition,
                 Status = asset.Status,
                 IsSpare = asset.IsSpare,
-                Specifications = asset.Specifications
+                Specifications = asset.Specifications ?? string.Empty  // ✅ Added safeguard
             };
         }
 
@@ -100,7 +100,9 @@ namespace AssetManagement.Business.Services
                 Condition = dto.Condition,
                 Status = dto.Status,
                 IsSpare = dto.IsSpare,
-                Specifications = dto.Specifications
+                Specifications = string.IsNullOrWhiteSpace(dto.Specifications)
+                    ? string.Empty                       // ✅ Prevents DB NULL insert
+                    : dto.Specifications.Trim()
             };
         }
     }

@@ -10,13 +10,15 @@ using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Database Context
+// Database context with detailed error logging
 builder.Services.AddDbContext<AssetDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .EnableDetailedErrors()
+           .EnableSensitiveDataLogging());
 
 // Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -31,32 +33,29 @@ builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<AuthService>();
 
-// Session storage for authentication
+// Use built-in ProtectedSessionStorage (works for Blazor Server)
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
 var app = builder.Build();
 
-// Ensure admin user exists on startup
+// Ensure admin user exists
 using (var scope = app.Services.CreateScope())
 {
     var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
     var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    
+
     var adminUsername = config["AdminCredentials:Username"] ?? "admin";
     var adminPassword = config["AdminCredentials:Password"] ?? "Admin@123";
-    
+
     await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
 }
 
-// Configure the HTTP request pipeline.
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-
-// COMMENTED OUT TO FIX HTTPS REDIRECT ERROR
-// app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();

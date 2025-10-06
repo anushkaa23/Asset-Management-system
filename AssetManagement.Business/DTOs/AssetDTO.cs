@@ -36,5 +36,7 @@ namespace AssetManagement.Business.DTOs
 
         [StringLength(1000)]
         public string Specifications { get; set; }
+
+        public DateTime WarrantyExpiry { get; set; }
     }
 }

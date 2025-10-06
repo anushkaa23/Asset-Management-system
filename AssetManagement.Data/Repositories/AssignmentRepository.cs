@@ -43,6 +43,15 @@ namespace AssetManagement.Data.Repositories
 
         public async Task<Assignment> UpdateAsync(Assignment assignment)
         {
+            // Detach any existing tracked entity
+            var existingEntity = _context.Assignments.Local
+                .FirstOrDefault(a => a.AssignmentId == assignment.AssignmentId);
+            
+            if (existingEntity != null)
+            {
+                _context.Entry(existingEntity).State = EntityState.Detached;
+            }
+
             _context.Assignments.Update(assignment);
             await _context.SaveChangesAsync();
             return assignment;
@@ -76,11 +85,11 @@ namespace AssetManagement.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Assignment> GetActiveAssignmentForAssetAsync(int assetId)
+        public async Task<Assignment?> GetActiveAssignmentForAssetAsync(int assetId)
         {
             return await _context.Assignments
                 .Include(a => a.Employee)
-                .FirstOrDefaultAsync(a => a.AssetId == assetId && 
+                .FirstOrDefaultAsync(a => a.AssetId == assetId &&
                                         a.IsActive && 
                                         a.ReturnedDate == null);
         }

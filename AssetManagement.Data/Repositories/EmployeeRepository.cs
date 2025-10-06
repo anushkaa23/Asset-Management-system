@@ -40,6 +40,15 @@ namespace AssetManagement.Data.Repositories
 
         public async Task<Employee> UpdateAsync(Employee employee)
         {
+            // Detach any existing tracked entity
+            var existingEntity = _context.Employees.Local
+                .FirstOrDefault(e => e.EmployeeId == employee.EmployeeId);
+            
+            if (existingEntity != null)
+            {
+                _context.Entry(existingEntity).State = EntityState.Detached;
+            }
+
             employee.ModifiedDate = DateTime.UtcNow;
             _context.Employees.Update(employee);
             await _context.SaveChangesAsync();

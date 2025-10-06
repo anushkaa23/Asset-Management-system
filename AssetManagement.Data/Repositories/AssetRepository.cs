@@ -33,13 +33,34 @@ namespace AssetManagement.Data.Repositories
 
         public async Task<Asset> AddAsync(Asset asset)
         {
-            _context.Assets.Add(asset);
-            await _context.SaveChangesAsync();
-            return asset;
+            try
+            {
+                _context.Assets.Add(asset);
+                await _context.SaveChangesAsync();
+                return asset;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // throw a new exception with inner details so Blazor can show it,
+                // or log it with your logging framework (preferred).
+                var inner = dbEx.InnerException?.Message ?? dbEx.Message;
+                // for development you can throw:
+                throw new Exception("DB save failed: " + inner, dbEx);
+                // in production, log detailed message and throw a safe message.
+            }
         }
 
         public async Task<Asset> UpdateAsync(Asset asset)
         {
+            // Detach any existing tracked entity
+            var existingEntity = _context.Assets.Local
+                .FirstOrDefault(a => a.AssetId == asset.AssetId);
+            
+            if (existingEntity != null)
+            {
+                _context.Entry(existingEntity).State = EntityState.Detached;
+            }
+
             asset.ModifiedDate = DateTime.UtcNow;
             _context.Assets.Update(asset);
             await _context.SaveChangesAsync();

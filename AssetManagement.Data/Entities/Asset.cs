@@ -51,9 +51,8 @@ namespace AssetManagement.Data.Entities
 
         public bool IsSpare { get; set; } = false;
 
-        [MaxLength(1000)]
-        public string Specifications { get; set; }
-
+        [StringLength(1000)]
+        public string? Specifications { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? ModifiedDate { get; set; }
 

@@ -109,8 +109,8 @@
     </div>
 </div>
 
-@code {
-    private AssetDTO asset = new AssetDTO();
+@* @code {
+    private Asset asset = new Asset();
     private bool isSaving = false;
 
     private async Task HandleSubmit()
@@ -119,6 +119,35 @@
         try
         {
             await AssetService.CreateAssetAsync(asset);
+            await JSRuntime.InvokeVoidAsync("alert", "Asset created successfully!");
+            NavigationManager.NavigateTo("/assets");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/assets");
+    }
+} *@
+
+@code {
+    private AssetDTO asset = new AssetDTO();  // ✅ Use DTO, not Asset
+    private bool isSaving = false;
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        try
+        {
+            await AssetService.CreateAssetAsync(asset);  // ✅ Pass DTO, not Entity
             await JSRuntime.InvokeVoidAsync("alert", "Asset created successfully!");
             NavigationManager.NavigateTo("/assets");
         }

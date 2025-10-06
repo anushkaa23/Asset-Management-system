@@ -55,6 +55,8 @@ else
                             <th>Condition</th>
                             <th>Status</th>
                             <th>Spare</th>
+                            <th>Warranty Expiry</th>
+                            <th>Days Remaining</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -85,6 +87,14 @@ else
                                     {
                                         <span class="badge bg-secondary">No</span>
                                     }
+                                </td>
+                                <td>
+                                    @(asset.WarrantyExpiry != default ? asset.WarrantyExpiry.ToString("yyyy-MM-dd") : "-")
+                                </td>
+                                <td>
+                                    @(asset.WarrantyExpiry != default
+                                        ? Math.Max((asset.WarrantyExpiry - DateTime.Now).Days, 0)
+                                        : 0)
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(asset.AssetId)">
