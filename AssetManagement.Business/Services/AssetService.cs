@@ -24,7 +24,7 @@ namespace AssetManagement.Business.Services
             return assets.Select(MapToDTO);
         }
 
-        public async Task<AssetDTO> GetAssetByIdAsync(int id)
+        public async Task<AssetDTO?> GetAssetByIdAsync(int id)
         {
             var asset = await _assetRepository.GetByIdAsync(id);
             return asset != null ? MapToDTO(asset) : null;
@@ -32,14 +32,44 @@ namespace AssetManagement.Business.Services
 
         public async Task<AssetDTO> CreateAssetAsync(AssetDTO assetDto)
         {
-            var asset = MapToEntity(assetDto);
+            var asset = new Asset
+            {
+                AssetName = assetDto.AssetName,
+                AssetType = assetDto.AssetType,
+                MakeModel = assetDto.MakeModel,
+                SerialNumber = assetDto.SerialNumber,
+                PurchaseDate = assetDto.PurchaseDate,
+                WarrantyExpiryDate = assetDto.WarrantyExpiryDate,
+                Condition = assetDto.Condition,
+                Status = assetDto.Status,
+                IsSpare = assetDto.IsSpare,
+                Specifications = assetDto.Specifications,
+                CreatedDate = DateTime.UtcNow  // FIXED: Set CreatedDate
+            };
+            
             var created = await _assetRepository.AddAsync(asset);
             return MapToDTO(created);
         }
 
         public async Task<AssetDTO> UpdateAssetAsync(AssetDTO assetDto)
         {
-            var asset = MapToEntity(assetDto);
+            // FIXED: Create entity with AssetId for update
+            var asset = new Asset
+            {
+                AssetId = assetDto.AssetId,  // Important: Include the ID
+                AssetName = assetDto.AssetName,
+                AssetType = assetDto.AssetType,
+                MakeModel = assetDto.MakeModel,
+                SerialNumber = assetDto.SerialNumber,
+                PurchaseDate = assetDto.PurchaseDate,
+                WarrantyExpiryDate = assetDto.WarrantyExpiryDate,
+                Condition = assetDto.Condition,
+                Status = assetDto.Status,
+                IsSpare = assetDto.IsSpare,
+                Specifications = assetDto.Specifications
+                // Note: CreatedDate and ModifiedDate are handled by the repository
+            };
+            
             var updated = await _assetRepository.UpdateAsync(asset);
             return MapToDTO(updated);
         }
@@ -75,34 +105,14 @@ namespace AssetManagement.Business.Services
                 AssetId = asset.AssetId,
                 AssetName = asset.AssetName,
                 AssetType = asset.AssetType,
-                MakeModel = asset.MakeModel,
-                SerialNumber = asset.SerialNumber,
+                MakeModel = asset.MakeModel ?? string.Empty,
+                SerialNumber = asset.SerialNumber ?? string.Empty,
                 PurchaseDate = asset.PurchaseDate,
                 WarrantyExpiryDate = asset.WarrantyExpiryDate,
                 Condition = asset.Condition,
                 Status = asset.Status,
                 IsSpare = asset.IsSpare,
-                Specifications = asset.Specifications ?? string.Empty  // ✅ Added safeguard
-            };
-        }
-
-        private Asset MapToEntity(AssetDTO dto)
-        {
-            return new Asset
-            {
-                AssetId = dto.AssetId,
-                AssetName = dto.AssetName,
-                AssetType = dto.AssetType,
-                MakeModel = dto.MakeModel,
-                SerialNumber = dto.SerialNumber,
-                PurchaseDate = dto.PurchaseDate,
-                WarrantyExpiryDate = dto.WarrantyExpiryDate,
-                Condition = dto.Condition,
-                Status = dto.Status,
-                IsSpare = dto.IsSpare,
-                Specifications = string.IsNullOrWhiteSpace(dto.Specifications)
-                    ? string.Empty                       // ✅ Prevents DB NULL insert
-                    : dto.Specifications.Trim()
+                Specifications = asset.Specifications ?? string.Empty
             };
         }
     }

@@ -12,13 +12,13 @@
     </button>
 </div>
 
-@if (assets == null)
+@if (_isLoading)
 {
     <div class="text-center my-5">
         <div class="spinner-border" role="status"></div>
     </div>
 }
-else if (!assets.Any())
+else if (assets == null || !assets.Any())
 {
     <div class="alert alert-info">
         <i class="oi oi-info"></i> No assets found. Click "Add Asset" to create your first asset record.
@@ -31,10 +31,10 @@ else
             <div class="row mb-3">
                 <div class="col-md-6">
                     <input type="text" class="form-control" placeholder="Search by name, type, or serial..." 
-                           @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterAssets" />
+                           @bind="searchTerm" @bind:event="oninput" />
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" @bind="statusFilter" @bind:after="FilterAssets">
+                    <select class="form-select" @bind="statusFilter">
                         <option value="">All Statuses</option>
                         <option value="0">Available</option>
                         <option value="1">Assigned</option>
@@ -55,8 +55,6 @@ else
                             <th>Condition</th>
                             <th>Status</th>
                             <th>Spare</th>
-                            <th>Warranty Expiry</th>
-                            <th>Days Remaining</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -67,7 +65,7 @@ else
                                 <td>@asset.AssetId</td>
                                 <td>@asset.AssetName</td>
                                 <td>@asset.AssetType</td>
-                                <td>@asset.SerialNumber</td>
+                                <td>@(asset.SerialNumber ?? "-")</td>
                                 <td>
                                     <span class="badge bg-@GetConditionBadgeClass(asset.Condition)">
                                         @asset.Condition
@@ -79,22 +77,9 @@ else
                                     </span>
                                 </td>
                                 <td>
-                                    @if (asset.IsSpare)
-                                    {
-                                        <span class="badge bg-info">Yes</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">No</span>
-                                    }
-                                </td>
-                                <td>
-                                    @(asset.WarrantyExpiry != default ? asset.WarrantyExpiry.ToString("yyyy-MM-dd") : "-")
-                                </td>
-                                <td>
-                                    @(asset.WarrantyExpiry != default
-                                        ? Math.Max((asset.WarrantyExpiry - DateTime.Now).Days, 0)
-                                        : 0)
+                                    <span class="badge bg-@(asset.IsSpare ? "info" : "secondary")">
+                                        @(asset.IsSpare ? "Yes" : "No")
+                                    </span>
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-warning me-1" @onclick="() => NavigateToEdit(asset.AssetId)">
@@ -118,10 +103,11 @@ else
 }
 
 @code {
-    private List<AssetDTO> assets;
+    private List<AssetDTO> assets = new();
     private List<AssetDTO> filteredAssets = new();
     private string searchTerm = "";
     private string statusFilter = "";
+    private bool _isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,9 +116,23 @@ else
 
     private async Task LoadAssets()
     {
-        var result = await AssetService.GetAllAssetsAsync();
-        assets = result.ToList();
-        filteredAssets = assets;
+        try
+        {
+            _isLoading = true;
+            var result = await AssetService.GetAllAssetsAsync();
+            assets = result?.ToList() ?? new List<AssetDTO>();
+            FilterAssets();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading assets: {ex.Message}");
+            assets = new List<AssetDTO>();
+            filteredAssets = new List<AssetDTO>();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
     private void FilterAssets()
@@ -142,19 +142,16 @@ else
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             filteredAssets = filteredAssets.Where(a =>
-                a.AssetName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                a.AssetType.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (a.AssetName ?? "").Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                (a.AssetType ?? "").Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                 (!string.IsNullOrEmpty(a.SerialNumber) && a.SerialNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
             ).ToList();
         }
 
-        if (!string.IsNullOrWhiteSpace(statusFilter))
+        if (!string.IsNullOrWhiteSpace(statusFilter) && int.TryParse(statusFilter, out var statusInt))
         {
-            if (int.TryParse(statusFilter, out var statusInt))
-            {
-                var status = (AssetStatus)statusInt;
-                filteredAssets = filteredAssets.Where(a => a.Status == status).ToList();
-            }
+            var status = (AssetStatus)statusInt;
+            filteredAssets = filteredAssets.Where(a => a.Status == status).ToList();
         }
     }
 
@@ -183,7 +180,6 @@ else
     private async Task DeleteAsset(int id)
     {
         var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this asset?");
-
         if (confirmed)
         {
             try

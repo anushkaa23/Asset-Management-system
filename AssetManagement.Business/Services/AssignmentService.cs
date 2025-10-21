@@ -6,7 +6,6 @@ using AssetManagement.Business.DTOs;
 using AssetManagement.Business.Interfaces;
 using AssetManagement.Data.Entities;
 using AssetManagement.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace AssetManagement.Business.Services
 {
@@ -27,7 +26,7 @@ namespace AssetManagement.Business.Services
             return assignments.Select(MapToDTO);
         }
 
-        public async Task<AssignmentDTO> GetAssignmentByIdAsync(int id)
+        public async Task<AssignmentDTO?> GetAssignmentByIdAsync(int id)
         {
             var assignment = await _assignmentRepository.GetByIdAsync(id);
             return assignment != null ? MapToDTO(assignment) : null;
@@ -35,7 +34,7 @@ namespace AssetManagement.Business.Services
 
         public async Task<AssignmentDTO> CreateAssignmentAsync(AssignmentDTO assignmentDto)
         {
-            // Check if asset exists
+            // Check if asset exists and is available
             var asset = await _assetRepository.GetByIdAsync(assignmentDto.AssetId);
             if (asset == null)
                 throw new InvalidOperationException("Asset not found");
@@ -43,40 +42,40 @@ namespace AssetManagement.Business.Services
             if (asset.Status != AssetStatus.Available)
                 throw new InvalidOperationException("Asset is not available for assignment");
 
-            // Check active assignment
+            // Check if asset already has an active assignment
             var existingAssignment = await _assignmentRepository.GetActiveAssignmentForAssetAsync(assignmentDto.AssetId);
             if (existingAssignment != null)
                 throw new InvalidOperationException("Asset is already assigned to another employee");
 
-            // Minimal fix: ensure AssignedDate and Notes are valid
-            var assignedDate = assignmentDto.AssignedDate != default ? assignmentDto.AssignedDate : DateTime.UtcNow;
-            var notes = string.IsNullOrWhiteSpace(assignmentDto.Notes) ? "" : assignmentDto.Notes;
-
-            // Create assignment
+            // FIXED: Create assignment with proper entity structure
             var assignment = new Assignment
             {
                 AssetId = assignmentDto.AssetId,
                 EmployeeId = assignmentDto.EmployeeId,
-                AssignedDate = assignedDate,
-                Notes = notes,
-                IsActive = true
+                AssignmentDate = assignmentDto.AssignmentDate,
+                Notes = assignmentDto.Notes ?? string.Empty,
+                IsActive = true,
+                IsReturned = false  // FIXED: Set IsReturned
             };
 
-            Assignment created = null;
+            var created = await _assignmentRepository.AddAsync(assignment);
 
-            try
+            // FIXED: Update asset status properly by creating new entity for update
+            var assetToUpdate = new Asset
             {
-                created = await _assignmentRepository.AddAsync(assignment);
-            }
-            catch (DbUpdateException ex)
-            {
-                var innerMsg = ex.InnerException?.Message ?? ex.Message;
-                throw new InvalidOperationException($"Error saving assignment: {innerMsg}");
-            }
-
-            // Update asset status AFTER assignment is saved
-            asset.Status = AssetStatus.Assigned;
-            await _assetRepository.UpdateAsync(asset);
+                AssetId = asset.AssetId,
+                AssetName = asset.AssetName,
+                AssetType = asset.AssetType,
+                MakeModel = asset.MakeModel,
+                SerialNumber = asset.SerialNumber,
+                PurchaseDate = asset.PurchaseDate,
+                WarrantyExpiryDate = asset.WarrantyExpiryDate,
+                Condition = asset.Condition,
+                Status = AssetStatus.Assigned,  // Change status to Assigned
+                IsSpare = asset.IsSpare,
+                Specifications = asset.Specifications
+            };
+            await _assetRepository.UpdateAsync(assetToUpdate);
 
             return MapToDTO(created);
         }
@@ -87,20 +86,40 @@ namespace AssetManagement.Business.Services
             if (assignment == null)
                 return false;
 
-            // Update assignment
-            assignment.ReturnedDate = returnDate;
-            assignment.IsActive = false;
-            if (!string.IsNullOrWhiteSpace(notes))
-                assignment.Notes = notes;
+            // FIXED: Create new assignment entity for update
+            var assignmentToUpdate = new Assignment
+            {
+                AssignmentId = assignment.AssignmentId,
+                AssetId = assignment.AssetId,
+                EmployeeId = assignment.EmployeeId,
+                AssignmentDate = assignment.AssignmentDate,
+                ReturnDate = returnDate,
+                IsActive = false,
+                IsReturned = true,  // FIXED: Set IsReturned to true
+                Notes = !string.IsNullOrWhiteSpace(notes) ? notes : assignment.Notes
+            };
 
-            await _assignmentRepository.UpdateAsync(assignment);
+            await _assignmentRepository.UpdateAsync(assignmentToUpdate);
 
-            // Update asset status to Available
+            // FIXED: Update asset status to Available
             var asset = await _assetRepository.GetByIdAsync(assignment.AssetId);
             if (asset != null)
             {
-                asset.Status = AssetStatus.Available;
-                await _assetRepository.UpdateAsync(asset);
+                var assetToUpdate = new Asset
+                {
+                    AssetId = asset.AssetId,
+                    AssetName = asset.AssetName,
+                    AssetType = asset.AssetType,
+                    MakeModel = asset.MakeModel,
+                    SerialNumber = asset.SerialNumber,
+                    PurchaseDate = asset.PurchaseDate,
+                    WarrantyExpiryDate = asset.WarrantyExpiryDate,
+                    Condition = asset.Condition,
+                    Status = AssetStatus.Available,  // Change status back to Available
+                    IsSpare = asset.IsSpare,
+                    Specifications = asset.Specifications
+                };
+                await _assetRepository.UpdateAsync(assetToUpdate);
             }
 
             return true;
@@ -131,12 +150,12 @@ namespace AssetManagement.Business.Services
                 AssignmentId = assignment.AssignmentId,
                 AssetId = assignment.AssetId,
                 EmployeeId = assignment.EmployeeId,
-                AssignedDate = assignment.AssignedDate,
-                ReturnedDate = assignment.ReturnedDate,
-                Notes = assignment.Notes,
+                AssignmentDate = assignment.AssignmentDate,
+                ReturnDate = assignment.ReturnDate,
+                Notes = assignment.Notes ?? string.Empty,
                 IsActive = assignment.IsActive,
-                AssetName = assignment.Asset?.AssetName,
-                EmployeeName = assignment.Employee?.FullName
+                AssetName = assignment.Asset?.AssetName ?? string.Empty,
+                EmployeeName = assignment.Employee?.FullName ?? string.Empty
             };
         }
     }

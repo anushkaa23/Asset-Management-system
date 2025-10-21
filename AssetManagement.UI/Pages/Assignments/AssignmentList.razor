@@ -65,11 +65,11 @@ else
                                 <td>@assignment.AssignmentId</td>
                                 <td>@assignment.AssetName</td>
                                 <td>@assignment.EmployeeName</td>
-                                <td>@assignment.AssignedDate.ToString("yyyy-MM-dd")</td>
+                                <td>@assignment.AssignmentDate.ToString("yyyy-MM-dd")</td>
                                 <td>
-                                    @if (assignment.ReturnedDate.HasValue)
+                                    @if (assignment.ReturnDate.HasValue)
                                     {
-                                        @assignment.ReturnedDate.Value.ToString("yyyy-MM-dd")
+                                        @assignment.ReturnDate.Value.ToString("yyyy-MM-dd")
                                     }
                                     else
                                     {

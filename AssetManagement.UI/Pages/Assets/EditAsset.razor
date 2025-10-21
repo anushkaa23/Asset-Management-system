@@ -132,21 +132,20 @@ else
 
     private async Task HandleSubmit()
     {
+        if (isSaving) return; // FIX: Prevent double submission
+        
         isSaving = true;
 
         try
         {
             await AssetService.UpdateAssetAsync(asset);
             await JSRuntime.InvokeVoidAsync("alert", "Asset updated successfully!");
-            NavigationManager.NavigateTo("/assets");
+            NavigationManager.NavigateTo("/assets", forceLoad: true); // FIX: Added forceLoad
         }
         catch (Exception ex)
         {
             await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
-        }
-        finally
-        {
-            isSaving = false;
+            isSaving = false; // FIX: Re-enable button on error
         }
     }
 

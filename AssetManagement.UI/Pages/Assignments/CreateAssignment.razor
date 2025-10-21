@@ -75,9 +75,9 @@ else
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="assignedDate" class="form-label">Assignment Date *</label>
-                        <InputDate id="assignedDate" class="form-control" @bind-Value="assignment.AssignedDate" />
-                        <ValidationMessage For="@(() => assignment.AssignedDate)" />
+                        <label for="assignmentDate" class="form-label">Assignment Date *</label>
+                        <InputDate id="assignmentDate" class="form-control" @bind-Value="assignment.AssignmentDate" />
+                        <ValidationMessage For="@(() => assignment.AssignmentDate)" />
                     </div>
                 </div>
 
@@ -110,49 +110,34 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Load all assets and active assignments
-        var allAssets = (await AssetService.GetAllAssetsAsync()).ToList();
-        var activeAssignments = (await AssignmentService.GetActiveAssignmentsAsync()).ToList();
-
-        // Only show assets that are available and not already assigned
-        availableAssets = allAssets
-            .Where(a => a.Status == AssetStatus.Available && !activeAssignments.Any(asg => asg.AssetId == a.AssetId))
-            .ToList();
-
+        availableAssets = (await AssetService.GetAvailableAssetsAsync()).ToList();
         activeEmployees = (await EmployeeService.GetActiveEmployeesAsync()).ToList();
-
-        // Ensure default values
-        if (assignment.AssignedDate == default)
-            assignment.AssignedDate = DateTime.UtcNow;
-
-        if (string.IsNullOrWhiteSpace(assignment.Notes))
-            assignment.Notes = "";
     }
 
     private async Task HandleSubmit()
     {
+        if (assignment.AssetId == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please select a valid asset!");
+            return;
+        }
+
+        if (assignment.EmployeeId == 0)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Please select a valid employee!");
+            return;
+        }
+
         isSaving = true;
         try
         {
-            // Validate AssetId and EmployeeId before saving
-            if (assignment.AssetId == 0 || assignment.EmployeeId == 0)
-            {
-                await JSRuntime.InvokeVoidAsync("alert", "Please select both Asset and Employee.");
-                return;
-            }
-
-            // Ensure Notes is not null
-            assignment.Notes = string.IsNullOrWhiteSpace(assignment.Notes) ? "" : assignment.Notes;
-
             await AssignmentService.CreateAssignmentAsync(assignment);
-
             await JSRuntime.InvokeVoidAsync("alert", "Assignment created successfully!");
             NavigationManager.NavigateTo("/assignments");
         }
         catch (Exception ex)
         {
-            var msg = ex.InnerException?.Message ?? ex.Message;
-            await JSRuntime.InvokeVoidAsync("alert", $"Error: {msg}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error: {ex.Message}");
         }
         finally
         {

@@ -12,13 +12,15 @@ namespace AssetManagement.Data.Entities
         [Required]
         public int AssetId { get; set; }
 
-        [Required]
-        public int EmployeeId { get; set; }
+        public int? EmployeeId { get; set; } // Nullable now
 
         [Required]
-        public DateTime AssignedDate { get; set; } = DateTime.UtcNow;
+        public DateTime AssignmentDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
-        public DateTime? ReturnedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; } // needed for repository updates
+
+        public bool IsReturned { get; set; } = false;
 
         [MaxLength(500)]
         public string Notes { get; set; }

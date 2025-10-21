@@ -10,13 +10,13 @@ namespace AssetManagement.Business.DTOs
         [Required(ErrorMessage = "Please select an asset")]
         public int AssetId { get; set; }
 
-        [Required(ErrorMessage = "Please select an employee")]
-        public int EmployeeId { get; set; }
+        // Made nullable to match Assignment.EmployeeId
+        public int? EmployeeId { get; set; }
 
         [Required]
-        public DateTime AssignedDate { get; set; } = DateTime.Now;
+        public DateTime AssignmentDate { get; set; } = DateTime.Now;
 
-        public DateTime? ReturnedDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
         [StringLength(500)]
         public string Notes { get; set; }

@@ -1,0 +1,23 @@
+
+@inherits LayoutComponentBase
+
+<!-- Public layout - No authentication required -->
+<div class="public-page">
+    @Body
+</div>
+
+<style>
+    .public-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
+
+@code
+ 
+{
+
+    
+// No authentication check here - this is for public pages
+
+}

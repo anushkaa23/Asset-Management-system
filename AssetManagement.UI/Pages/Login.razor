@@ -1,5 +1,5 @@
-@layout EmptyLayout
 @page "/login"
+@layout PublicLayout
 @using System.ComponentModel.DataAnnotations
 @using AssetManagement.Business.Services
 @inject AuthService AuthService
@@ -37,20 +37,29 @@
                 <ValidationMessage For="@(() => loginModel.Password)" />
             </div>
 
-            <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+            <button type="submit" class="btn btn-primary w-100 mb-3" disabled="@isLoading">
                 @if (isLoading)
                 {
                     <span class="spinner-border spinner-border-sm me-2" role="status"></span>
                 }
                 Login
             </button>
-        </EditForm>
 
-        <div class="mt-4 text-center">
-            <small class="text-muted">
-                Default credentials: admin / Admin@123
-            </small>
-        </div>
+            <div class="text-center mb-3">
+                <small class="text-muted">
+                    Don't have an account?
+                    <a href="/register" class="text-decoration-none fw-bold">Register here</a>
+                </small>
+            </div>
+
+            <hr>
+
+            <div class="text-center">
+                <small class="text-muted">
+                    <strong>Default Admin:</strong> admin / Admin@123
+                </small>
+            </div>
+        </EditForm>
     </div>
 </div>
 
@@ -60,7 +69,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
 
     .login-card {
@@ -71,6 +79,26 @@
         width: 100%;
         max-width: 400px;
     }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    hr {
+        margin: 1.5rem 0;
+        opacity: 0.1;
+    }
 </style>
 
 @code {
@@ -78,8 +106,30 @@
     private string errorMessage = "";
     private bool isLoading = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await SessionStorage.GetAsync<string>("username");
+
+            if (result.Success && !string.IsNullOrEmpty(result.Value))
+            {
+                // Already logged in, redirect to dashboard
+                NavigationManager.NavigateTo("/", forceLoad: true);
+                return;
+            }
+        }
+        catch
+        {
+            // User not logged in, stay on login page
+        }
+    }
+
     private async Task HandleLogin()
     {
+        if (isLoading)
+            return;
+
         isLoading = true;
         errorMessage = "";
 
@@ -91,12 +141,11 @@
             {
                 await SessionStorage.SetAsync("username", user.Username);
                 await SessionStorage.SetAsync("userId", user.UserId);
-
-                NavigationManager.NavigateTo("/", false);
+                NavigationManager.NavigateTo("/", forceLoad: true);
             }
             else
             {
-                errorMessage = "Invalid username or password";
+                errorMessage = "Invalid username or password. Please try again or register a new account.";
             }
         }
         catch (Exception ex)

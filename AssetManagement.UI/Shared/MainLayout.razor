@@ -3,48 +3,71 @@
 @inject ProtectedSessionStorage SessionStorage
 @inject IJSRuntime JSRuntime
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <span class="user-info">
-                Welcome, @username
-            </span>
-            <button class="btn btn-sm btn-outline-danger" @onclick="Logout">
-                Logout
-            </button>
+@if (isLoginPage)
+{
+    @Body
+}
+else
+{
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+        <main>
+            <div class="top-row px-4">
+                <span class="user-info">
+                    Welcome, @username
+                </span>
+                <button class="btn btn-sm btn-outline-danger" @onclick="Logout">
+                    Logout
+                </button>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+}
 
 @code {
     private string username = "User";
+    private bool isLoginPage = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        // FIX: Check if current page is login
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        isLoginPage = uri.AbsolutePath.ToLower() == "/login";
+
+        if (!isLoginPage)
         {
             try
             {
                 var result = await SessionStorage.GetAsync<string>("username");
-                if (result.Success && !string.IsNullOrEmpty(result.Value))
+                
+                if (!result.Success || string.IsNullOrEmpty(result.Value))
                 {
-                    username = result.Value;
-                    StateHasChanged();
+                    NavigationManager.NavigateTo("/login", forceLoad: true);
+                    return;
                 }
+
+                username = result.Value;
             }
             catch
             {
-                // Silently fail - login page doesn't need username
+                NavigationManager.NavigateTo("/login", forceLoad: true);
             }
         }
+    }
+
+    // FIX: Added to update layout when navigating
+    protected override void OnParametersSet()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        isLoginPage = uri.AbsolutePath.ToLower() == "/login";
+        StateHasChanged();
     }
 
     private async Task Logout()
@@ -53,11 +76,11 @@
         {
             await SessionStorage.DeleteAsync("username");
             await SessionStorage.DeleteAsync("userId");
-            NavigationManager.NavigateTo("/login", true);
+            NavigationManager.NavigateTo("/login", forceLoad: true);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Logout error: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", $"Error logging out: {ex.Message}");
         }
     }
 }

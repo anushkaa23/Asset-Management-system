@@ -27,17 +27,17 @@ namespace AssetManagement.Data.Entities
 
         [Required(ErrorMessage = "Asset Name is required")]
         [MaxLength(100)]
-        public string AssetName { get; set; }
+        public string AssetName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Asset Type is required")]
         [MaxLength(50)]
-        public string AssetType { get; set; }
+        public string AssetType { get; set; } = string.Empty;
 
         [MaxLength(100)]
-        public string MakeModel { get; set; }
+        public string? MakeModel { get; set; }  // Nullable now
 
         [MaxLength(100)]
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }  // Nullable now
 
         public DateTime? PurchaseDate { get; set; }
 
@@ -51,8 +51,9 @@ namespace AssetManagement.Data.Entities
 
         public bool IsSpare { get; set; } = false;
 
-        [StringLength(1000)]
-        public string? Specifications { get; set; }
+        [MaxLength(1000)]
+        public string? Specifications { get; set; }  // Nullable now
+
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? ModifiedDate { get; set; }
 

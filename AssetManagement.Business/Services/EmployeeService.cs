@@ -38,7 +38,18 @@ namespace AssetManagement.Business.Services
                 throw new InvalidOperationException("Email already exists");
             }
 
-            var employee = MapToEntity(employeeDto);
+            // FIXED: Create entity with CreatedDate
+            var employee = new Employee
+            {
+                FullName = employeeDto.FullName,
+                Department = employeeDto.Department,
+                Email = employeeDto.Email,
+                PhoneNumber = employeeDto.PhoneNumber,
+                Designation = employeeDto.Designation,
+                IsActive = employeeDto.IsActive,
+                CreatedDate = DateTime.UtcNow  // FIXED: Set CreatedDate
+            };
+
             var created = await _employeeRepository.AddAsync(employee);
             return MapToDTO(created);
         }
@@ -51,14 +62,33 @@ namespace AssetManagement.Business.Services
                 throw new InvalidOperationException("Email already exists");
             }
 
-            var employee = MapToEntity(employeeDto);
+            // FIXED: Create entity with EmployeeId for update
+            var employee = new Employee
+            {
+                EmployeeId = employeeDto.EmployeeId,  // Important: Include the ID
+                FullName = employeeDto.FullName,
+                Department = employeeDto.Department,
+                Email = employeeDto.Email,
+                PhoneNumber = employeeDto.PhoneNumber,
+                Designation = employeeDto.Designation,
+                IsActive = employeeDto.IsActive
+                // Note: CreatedDate and ModifiedDate are handled by the repository
+            };
+
             var updated = await _employeeRepository.UpdateAsync(employee);
             return MapToDTO(updated);
         }
 
         public async Task<bool> DeleteEmployeeAsync(int id)
         {
-            return await _employeeRepository.DeleteAsync(id);
+            try
+            {
+                return await _employeeRepository.DeleteAsync(id);
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
         }
 
         public async Task<IEnumerable<EmployeeDTO>> GetActiveEmployeesAsync()
@@ -78,20 +108,6 @@ namespace AssetManagement.Business.Services
                 PhoneNumber = employee.PhoneNumber,
                 Designation = employee.Designation,
                 IsActive = employee.IsActive
-            };
-        }
-
-        private Employee MapToEntity(EmployeeDTO dto)
-        {
-            return new Employee
-            {
-                EmployeeId = dto.EmployeeId,
-                FullName = dto.FullName,
-                Department = dto.Department,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Designation = dto.Designation,
-                IsActive = dto.IsActive
             };
         }
     }

@@ -35,10 +35,10 @@ namespace AssetManagement.Data.Context
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Assignment>()
-                .HasOne(a => a.Employee)
-                .WithMany(emp => emp.Assignments)
-                .HasForeignKey(a => a.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            .HasOne(a => a.Employee)
+            .WithMany(emp => emp.Assignments)
+            .HasForeignKey(a => a.EmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);   // Changed from Restrict
 
             // User configuration
             modelBuilder.Entity<User>()
