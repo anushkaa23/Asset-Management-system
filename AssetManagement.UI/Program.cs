@@ -14,9 +14,50 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-// Database Context
+// Database Context - PostgreSQL for Production, SQL Server for Local
 builder.Services.AddDbContext<AssetDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+    
+    Console.WriteLine($"DATABASE_URL environment variable: {(string.IsNullOrEmpty(databaseUrl) ? "NOT SET" : "SET")}");
+    
+    if (!string.IsNullOrEmpty(databaseUrl))
+    {
+        // Production: PostgreSQL on Render.com
+        Console.WriteLine("Using PostgreSQL database...");
+        
+        try
+        {
+            // Handle both postgres:// and postgresql:// formats
+            var uriString = databaseUrl.Replace("postgres://", "postgresql://");
+            var uri = new Uri(uriString);
+            
+            var username = uri.UserInfo.Split(':')[0];
+            var password = uri.UserInfo.Split(':')[1];
+            var host = uri.Host;
+            var port = uri.Port > 0 ? uri.Port : 5432; // Default to 5432 if not specified
+            var database = uri.AbsolutePath.TrimStart('/');
+            
+            var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+            
+            Console.WriteLine($"PostgreSQL connection: Host={host}, Port={port}, Database={database}, Username={username}");
+            
+            options.UseNpgsql(connectionString);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+            throw;
+        }
+    }
+    else
+    {
+        // Local Development: SQL Server
+        Console.WriteLine("Using SQL Server database...");
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        options.UseSqlServer(connectionString);
+    }
+});
 
 // Repositories
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -36,16 +77,38 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 
 var app = builder.Build();
 
-// Ensure admin user exists on startup
-using (var scope = app.Services.CreateScope())
+// Run database migrations automatically
+try
 {
-    var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
-    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-    
-    var adminUsername = config["AdminCredentials:Username"] ?? "admin";
-    var adminPassword = config["AdminCredentials:Password"] ?? "Admin@123";
-    
-    await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AssetDbContext>();
+        
+        Console.WriteLine("Running database migrations...");
+        dbContext.Database.Migrate();
+        Console.WriteLine("Migrations completed successfully.");
+        
+        // Ensure admin user exists
+        var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
+        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        
+        var adminUsername = config["AdminCredentials:Username"] 
+            ?? Environment.GetEnvironmentVariable("AdminCredentials__Username") 
+            ?? "admin";
+        var adminPassword = config["AdminCredentials:Password"] 
+            ?? Environment.GetEnvironmentVariable("AdminCredentials__Password") 
+            ?? "Admin@123";
+        
+        Console.WriteLine($"Ensuring admin user '{adminUsername}' exists...");
+        await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
+        Console.WriteLine("Admin user setup completed.");
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error during startup: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    throw;
 }
 
 // Configure the HTTP request pipeline.
@@ -55,17 +118,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// COMMENTED OUT TO FIX HTTPS REDIRECT ERROR
-// app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-// Configure port for Render deployment
+// Configure port for deployment
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 app.Urls.Add($"http://0.0.0.0:{port}");
+
+Console.WriteLine($"Application starting on port {port}...");
 
 app.Run();
