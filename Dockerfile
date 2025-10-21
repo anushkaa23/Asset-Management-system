@@ -12,10 +12,6 @@ RUN dotnet restore "AssetManagement.UI/AssetManagement.UI.csproj"
 # Copy everything else
 COPY . .
 
-# Install EF Core tools for migrations
-RUN dotnet tool install --global dotnet-ef --version 9.0.0
-ENV PATH="${PATH}:/root/.dotnet/tools"
-
 # Build
 WORKDIR "/src/AssetManagement.UI"
 RUN dotnet build "AssetManagement.UI.csproj" -c Release -o /app/build
@@ -31,10 +27,7 @@ WORKDIR /app
 # Copy published files
 COPY --from=publish /app/publish .
 
-# Expose port
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+# The application will use PORT environment variable from Program.cs
+# No need to set ASPNETCORE_URLS here as it's handled in code
 
-# Start the application
-# Migrations will run automatically in Program.cs
 ENTRYPOINT ["dotnet", "AssetManagement.UI.dll"]
