@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AssetManagement.Data.Migrations
 {
     [DbContext(typeof(AssetDbContext))]
-    [Migration("20251024003245_InitialPostgreSQL")]
+    [Migration("20251024130818_InitialPostgreSQL")]
     partial class InitialPostgreSQL
     {
         /// <inheritdoc />
@@ -223,7 +223,7 @@ namespace AssetManagement.Data.Migrations
                     b.HasOne("AssetManagement.Data.Entities.Employee", "Employee")
                         .WithMany("Assignments")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Asset");
 

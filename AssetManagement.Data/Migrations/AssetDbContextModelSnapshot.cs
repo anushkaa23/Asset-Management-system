@@ -220,7 +220,7 @@ namespace AssetManagement.Data.Migrations
                     b.HasOne("AssetManagement.Data.Entities.Employee", "Employee")
                         .WithMany("Assignments")
                         .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Asset");
 
