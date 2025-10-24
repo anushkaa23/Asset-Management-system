@@ -18,32 +18,33 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<AssetDbContext>(options =>
 {
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-
+    
     Console.WriteLine($"DATABASE_URL environment variable: {(string.IsNullOrEmpty(databaseUrl) ? "NOT SET" : "SET")}");
-
+    
     if (!string.IsNullOrEmpty(databaseUrl))
     {
         // Production: PostgreSQL on Render.com
         Console.WriteLine("Using PostgreSQL database...");
-
+        
         try
         {
             // Handle both postgres:// and postgresql:// formats
             var uriString = databaseUrl.Replace("postgres://", "postgresql://");
             var uri = new Uri(uriString);
-
+            
             var username = uri.UserInfo.Split(':')[0];
             var password = uri.UserInfo.Split(':')[1];
             var host = uri.Host;
             var port = uri.Port > 0 ? uri.Port : 5432; // Default to 5432 if not specified
             var database = uri.AbsolutePath.TrimStart('/');
-
-            var connectionString =
-                $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
-
+            
+            var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+            
             Console.WriteLine($"PostgreSQL connection: Host={host}, Port={port}, Database={database}, Username={username}");
-
-            options.UseNpgsql(connectionString);
+            
+            options.UseNpgsql(connectionString)
+                   .ConfigureWarnings(warnings => 
+                       warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         }
         catch (Exception ex)
         {
@@ -84,22 +85,22 @@ try
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AssetDbContext>();
-
+        
         Console.WriteLine("Running database migrations...");
         dbContext.Database.Migrate();
         Console.WriteLine("Migrations completed successfully.");
-
+        
         // Ensure admin user exists
         var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
         var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-
-        var adminUsername = config["AdminCredentials:Username"]
-            ?? Environment.GetEnvironmentVariable("AdminCredentials__Username")
+        
+        var adminUsername = config["AdminCredentials:Username"] 
+            ?? Environment.GetEnvironmentVariable("AdminCredentials__Username") 
             ?? "admin";
-        var adminPassword = config["AdminCredentials:Password"]
-            ?? Environment.GetEnvironmentVariable("AdminCredentials__Password")
+        var adminPassword = config["AdminCredentials:Password"] 
+            ?? Environment.GetEnvironmentVariable("AdminCredentials__Password") 
             ?? "Admin@123";
-
+        
         Console.WriteLine($"Ensuring admin user '{adminUsername}' exists...");
         await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
         Console.WriteLine("Admin user setup completed.");

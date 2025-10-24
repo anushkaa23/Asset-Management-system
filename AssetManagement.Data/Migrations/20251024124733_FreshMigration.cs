@@ -5,7 +5,7 @@
 namespace AssetManagement.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateModel : Migration
+    public partial class FreshMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
