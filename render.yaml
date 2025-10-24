@@ -7,5 +7,18 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
-      - key: ASPNETCORE_URLS
-        value: http://0.0.0.0:$PORT
+      - key: DATABASE_URL
+        fromDatabase:
+          name: assetmanagement-db
+          property: connectionString
+      - key: AdminCredentials__Username
+        value: admin
+      - key: AdminCredentials__Password
+        value: Admin@123
+        # IMPORTANT: Change this to a secure password before deploying!
+
+databases:
+  - name: assetmanagement-db
+    databaseName: assetmanagement
+    user: assetmanagement_user
+    plan: free
