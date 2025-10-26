@@ -18,6 +18,25 @@ namespace AssetManagement.Data.Context
         {
             base.OnModelCreating(modelBuilder);
 
+            // Global configuration for PostgreSQL types
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entity.GetProperties())
+                {
+                    // Convert datetime2 to timestamp
+                    if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                    {
+                        property.SetColumnType("timestamp without time zone");
+                    }
+                    
+                    // Convert bit to boolean
+                    if (property.ClrType == typeof(bool))
+                    {
+                        property.SetColumnType("boolean");
+                    }
+                }
+            }
+
             // Configure for PostgreSQL explicitly
             // Employee configuration
             modelBuilder.Entity<Employee>(entity =>

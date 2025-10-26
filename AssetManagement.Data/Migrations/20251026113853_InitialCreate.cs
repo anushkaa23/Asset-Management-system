@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,20 +16,20 @@ namespace AssetManagement.Data.Migrations
                 name: "Assets",
                 columns: table => new
                 {
-                    AssetId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AssetId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AssetName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     AssetType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     MakeModel = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     SerialNumber = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    PurchaseDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    WarrantyExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Condition = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    IsSpare = table.Column<bool>(type: "bit", nullable: false),
+                    PurchaseDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    WarrantyExpiryDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Condition = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    IsSpare = table.Column<bool>(type: "boolean", nullable: false),
                     Specifications = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,16 +40,16 @@ namespace AssetManagement.Data.Migrations
                 name: "Employees",
                 columns: table => new
                 {
-                    EmployeeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FullName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     Department = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     Designation = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -59,13 +60,13 @@ namespace AssetManagement.Data.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     PasswordHash = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
                     FullName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastLoginDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    LastLoginDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -76,16 +77,16 @@ namespace AssetManagement.Data.Migrations
                 name: "Assignments",
                 columns: table => new
                 {
-                    AssignmentId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AssetId = table.Column<int>(type: "int", nullable: false),
-                    EmployeeId = table.Column<int>(type: "int", nullable: true),
-                    AssignmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsReturned = table.Column<bool>(type: "bit", nullable: false),
+                    AssignmentId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    AssetId = table.Column<int>(type: "integer", nullable: false),
+                    EmployeeId = table.Column<int>(type: "integer", nullable: true),
+                    AssignmentDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    ReturnDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    IsReturned = table.Column<bool>(type: "boolean", nullable: false),
                     Notes = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

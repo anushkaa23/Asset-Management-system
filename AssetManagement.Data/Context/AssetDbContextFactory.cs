@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace AssetManagement.Data.Context
 {
@@ -8,7 +10,15 @@ namespace AssetManagement.Data.Context
         public AssetDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AssetDbContext>();
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=AssetManagementDb;Trusted_Connection=True;MultipleActiveResultSets=true");
+            
+            // Get connection string from appsettings.json in UI project
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../AssetManagement.UI"))
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseNpgsql(connectionString);
 
             return new AssetDbContext(optionsBuilder.Options);
         }

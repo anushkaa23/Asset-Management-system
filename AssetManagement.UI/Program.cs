@@ -165,6 +165,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// COMMENTED OUT TO FIX HTTPS REDIRECT ERROR
+// app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseRouting();
 
