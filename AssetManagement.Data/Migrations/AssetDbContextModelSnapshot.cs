@@ -185,6 +185,7 @@ namespace AssetManagement.Data.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 

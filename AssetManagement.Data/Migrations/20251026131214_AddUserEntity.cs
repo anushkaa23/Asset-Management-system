@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AssetManagement.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddUserEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -64,7 +64,7 @@ namespace AssetManagement.Data.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     PasswordHash = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                    FullName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    FullName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     LastLoginDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },

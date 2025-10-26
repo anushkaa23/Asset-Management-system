@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AssetManagement.Data.Migrations
 {
     [DbContext(typeof(AssetDbContext))]
-    [Migration("20251026113853_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251026131214_AddUserEntity")]
+    partial class AddUserEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -188,6 +188,7 @@ namespace AssetManagement.Data.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 

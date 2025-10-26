@@ -17,10 +17,10 @@ namespace AssetManagement.Data.Entities
         public string PasswordHash { get; set; } = string.Empty;
 
         [MaxLength(100)]
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        
+
         public DateTime? LastLoginDate { get; set; }
     }
 }
