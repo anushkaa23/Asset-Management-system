@@ -124,38 +124,46 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 
 var app = builder.Build();
 
-// Run database migrations automatically
-try
+// Run database migrations automatically (only when DATABASE_URL is set - i.e., in production)
+var databaseUrlForMigration = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(databaseUrlForMigration))
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AssetDbContext>();
-        
-        Console.WriteLine("Running database migrations...");
-        dbContext.Database.Migrate();
-        Console.WriteLine("Migrations completed successfully.");
-        
-        // Ensure admin user exists
-        var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
-        var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-        
-        var adminUsername = config["AdminCredentials:Username"] 
-            ?? Environment.GetEnvironmentVariable("AdminCredentials__Username") 
-            ?? "admin";
-        var adminPassword = config["AdminCredentials:Password"] 
-            ?? Environment.GetEnvironmentVariable("AdminCredentials__Password") 
-            ?? "Admin@123";
-        
-        Console.WriteLine($"Ensuring admin user '{adminUsername}' exists...");
-        await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
-        Console.WriteLine("Admin user setup completed.");
+        using (var scope = app.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AssetDbContext>();
+            
+            Console.WriteLine("Running database migrations...");
+            dbContext.Database.Migrate();
+            Console.WriteLine("Migrations completed successfully.");
+            
+            // Ensure admin user exists
+            var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            
+            var adminUsername = config["AdminCredentials:Username"] 
+                ?? Environment.GetEnvironmentVariable("AdminCredentials__Username") 
+                ?? "admin";
+            var adminPassword = config["AdminCredentials:Password"] 
+                ?? Environment.GetEnvironmentVariable("AdminCredentials__Password") 
+                ?? "Admin@123";
+            
+            Console.WriteLine($"Ensuring admin user '{adminUsername}' exists...");
+            await authService.EnsureAdminExistsAsync(adminUsername, adminPassword);
+            Console.WriteLine("Admin user setup completed.");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error during startup: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw;
     }
 }
-catch (Exception ex)
+else
 {
-    Console.WriteLine($"Error during startup: {ex.Message}");
-    Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    throw;
+    Console.WriteLine("Skipping database migrations - DATABASE_URL not set (local development mode)");
 }
 
 // Configure the HTTP request pipeline.
