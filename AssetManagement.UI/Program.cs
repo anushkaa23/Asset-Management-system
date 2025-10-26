@@ -15,6 +15,52 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 // Database Context - PostgreSQL for Production, SQL Server for Local
+// builder.Services.AddDbContext<AssetDbContext>(options =>
+// {
+//     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+//     Console.WriteLine($"DATABASE_URL environment variable: {(string.IsNullOrEmpty(databaseUrl) ? "NOT SET" : "SET")}");
+
+//     if (!string.IsNullOrEmpty(databaseUrl))
+//     {
+//         // Production: PostgreSQL on Render.com
+//         Console.WriteLine("Using PostgreSQL database...");
+
+//         try
+//         {
+//             // Handle both postgres:// and postgresql:// formats
+//             var uriString = databaseUrl.Replace("postgres://", "postgresql://");
+//             var uri = new Uri(uriString);
+
+//             var username = uri.UserInfo.Split(':')[0];
+//             var password = uri.UserInfo.Split(':')[1];
+//             var host = uri.Host;
+//             var port = uri.Port > 0 ? uri.Port : 5432; // Default to 5432 if not specified
+//             var database = uri.AbsolutePath.TrimStart('/');
+
+//             var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+
+//             Console.WriteLine($"PostgreSQL connection: Host={host}, Port={port}, Database={database}, Username={username}");
+
+//             options.UseNpgsql(connectionString)
+//                    .ConfigureWarnings(warnings => 
+//                        warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+//         }
+//         catch (Exception ex)
+//         {
+//             Console.WriteLine($"Error parsing DATABASE_URL: {ex.Message}");
+//             throw;
+//         }
+//     }
+//     else
+//     {
+//         // Local Development: SQL Server
+//         Console.WriteLine("Using SQL Server database...");
+//         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//         options.UseSqlServer(connectionString);
+//     }
+// });
+
 builder.Services.AddDbContext<AssetDbContext>(options =>
 {
     var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
@@ -23,24 +69,23 @@ builder.Services.AddDbContext<AssetDbContext>(options =>
     
     if (!string.IsNullOrEmpty(databaseUrl))
     {
-        // Production: PostgreSQL on Render.com
+        // Production: PostgreSQL
         Console.WriteLine("Using PostgreSQL database...");
         
         try
         {
-            // Handle both postgres:// and postgresql:// formats
             var uriString = databaseUrl.Replace("postgres://", "postgresql://");
             var uri = new Uri(uriString);
             
             var username = uri.UserInfo.Split(':')[0];
             var password = uri.UserInfo.Split(':')[1];
             var host = uri.Host;
-            var port = uri.Port > 0 ? uri.Port : 5432; // Default to 5432 if not specified
+            var port = uri.Port > 0 ? uri.Port : 5432;
             var database = uri.AbsolutePath.TrimStart('/');
             
             var connectionString = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
             
-            Console.WriteLine($"PostgreSQL connection: Host={host}, Port={port}, Database={database}, Username={username}");
+            Console.WriteLine($"PostgreSQL connection: Host={host}, Port={port}, Database={database}");
             
             options.UseNpgsql(connectionString)
                    .ConfigureWarnings(warnings => 
@@ -54,10 +99,10 @@ builder.Services.AddDbContext<AssetDbContext>(options =>
     }
     else
     {
-        // Local Development: SQL Server
-        Console.WriteLine("Using SQL Server database...");
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        options.UseSqlServer(connectionString);
+        // Local Development: Use PostgreSQL too (not SQL Server)
+        Console.WriteLine("Using PostgreSQL database (local)...");
+        var connectionString = "Host=localhost;Port=5432;Database=AssetManagementDB;Username=postgres;Password=postgres";
+        options.UseNpgsql(connectionString);
     }
 });
 
